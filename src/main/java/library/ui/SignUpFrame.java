@@ -1,4 +1,4 @@
-package library;
+package library.ui;
 
 import java.awt.GridLayout;
 import javax.swing.JButton;
@@ -8,8 +8,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import library.persistence.DataStorage;
+import library.persistence.DataStorageFactory;
+import library.domain.User;
 
 public class SignUpFrame extends JFrame {
+
     private JTextField usernameField;
     private JPasswordField passwordField;
     private DataStorage dataStorage;

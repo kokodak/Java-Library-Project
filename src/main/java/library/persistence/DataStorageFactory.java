@@ -1,6 +1,7 @@
-package library;
+package library.persistence;
 
 public class DataStorageFactory {
+
     private static DataStorage dataStorage;
 
     public static DataStorage getInstance() {

@@ -1,19 +1,21 @@
-package library;
+package library.persistence;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import library.domain.Book;
+import library.domain.Rental;
+import library.domain.User;
 
 public class InMemoryDataStorage implements DataStorage {
 
-    private Map<Integer, Book> books = new HashMap<>();
+    private Map<Long, Book> books = new HashMap<>();
     private Map<String, User> users = new HashMap<>();
     private List<Rental> rentals = new ArrayList<>();
-    private AtomicInteger bookIdCounter = new AtomicInteger(1);
-    private AtomicInteger rentalIdCounter = new AtomicInteger(1);
+    private AtomicLong bookIdCounter = new AtomicLong(1);
+    private AtomicLong rentalIdCounter = new AtomicLong(1);
 
     @Override
     public void initializeData() {
@@ -27,7 +29,7 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Map<Integer, Book> getBooks() {
+    public Map<Long, Book> getBooks() {
         return books;
     }
 
@@ -48,12 +50,12 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public void removeBook(int bookId) {
+    public void removeBook(Long bookId) {
         books.remove(bookId);
     }
 
     @Override
-    public void updateBookAvailability(int bookId, boolean isAvailable) {
+    public void updateBookAvailability(Long bookId, boolean isAvailable) {
         Book book = books.get(bookId);
         if (book != null) {
             book.setAvailable(isAvailable);
@@ -65,10 +67,6 @@ public class InMemoryDataStorage implements DataStorage {
         users.put(user.getUsername(), user);
     }
 
-    @Override
-    public void removeUser(String username) {
-        users.remove(username);
-    }
 
     @Override
     public void addRental(Rental rental) {
@@ -87,7 +85,7 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public void removeRental(final int rentalId) {
+    public void removeRental(Long rentalId) {
         rentals.removeIf(rental -> rental.getId() == rentalId);
     }
 
@@ -111,17 +109,5 @@ public class InMemoryDataStorage implements DataStorage {
             }
         }
         return pendingReturns;
-    }
-
-    @Override
-    public List<Rental> getOverdueRentals() {
-        List<Rental> overdueRentals = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-        for (Rental rental : rentals) {
-            if (rental.isApproved() && !rental.isReturned() && rental.getDueDate().isBefore(today)) {
-                overdueRentals.add(rental);
-            }
-        }
-        return overdueRentals;
     }
 }

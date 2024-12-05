@@ -1,4 +1,4 @@
-package library;
+package library.persistence;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import library.domain.Book;
+import library.domain.Rental;
+import library.domain.User;
 
 public class MySQLDataStorage implements DataStorage {
 
     private Connection connection;
-
-    private Map<Integer, Book> books = new HashMap<>();
+    private Map<Long, Book> books = new HashMap<>();
     private Map<String, User> users = new HashMap<>();
     private List<Rental> rentals = new ArrayList<>();
 
@@ -49,7 +51,7 @@ public class MySQLDataStorage implements DataStorage {
         String sql = "SELECT * FROM books";
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                int id = rs.getInt("id");
+                Long id = rs.getLong("id");
                 String title = rs.getString("title");
                 String author = rs.getString("author");
                 String category = rs.getString("category");
@@ -66,9 +68,9 @@ public class MySQLDataStorage implements DataStorage {
         String sql = "SELECT * FROM rentals";
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                int id = rs.getInt("id");
+                Long id = rs.getLong("id");
                 String username = rs.getString("username");
-                int bookId = rs.getInt("book_id");
+                Long bookId = rs.getLong("book_id");
                 LocalDate rentalDate = rs.getDate("rental_date").toLocalDate();
                 LocalDate dueDate = rs.getDate("due_date").toLocalDate();
                 LocalDate returnDate = rs.getDate("return_date") != null ? rs.getDate("return_date").toLocalDate() : null;
@@ -101,7 +103,7 @@ public class MySQLDataStorage implements DataStorage {
     }
 
     @Override
-    public Map<Integer, Book> getBooks() {
+    public Map<Long, Book> getBooks() {
         return books;
     }
 
@@ -128,7 +130,7 @@ public class MySQLDataStorage implements DataStorage {
             // 생성된 키(책 ID) 가져오기
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                int id = rs.getInt(1);
+                Long id = rs.getLong(1);
                 book.setId(id);
                 books.put(id, book);
             }
@@ -138,10 +140,10 @@ public class MySQLDataStorage implements DataStorage {
     }
 
     @Override
-    public void removeBook(int bookId) {
+    public void removeBook(Long bookId) {
         String sql = "DELETE FROM books WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, bookId);
+            pstmt.setLong(1, bookId);
             pstmt.executeUpdate();
             books.remove(bookId);
         } catch (SQLException e) {
@@ -150,11 +152,11 @@ public class MySQLDataStorage implements DataStorage {
     }
 
     @Override
-    public void updateBookAvailability(int bookId, boolean isAvailable) {
+    public void updateBookAvailability(Long bookId, boolean isAvailable) {
         String sql = "UPDATE books SET is_available = ? WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setBoolean(1, isAvailable);
-            pstmt.setInt(2, bookId);
+            pstmt.setLong(2, bookId);
             pstmt.executeUpdate();
             Book book = books.get(bookId);
             if (book != null) {
@@ -180,23 +182,11 @@ public class MySQLDataStorage implements DataStorage {
     }
 
     @Override
-    public void removeUser(String username) {
-        String sql = "DELETE FROM users WHERE username = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, username);
-            pstmt.executeUpdate();
-            users.remove(username);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
     public void addRental(Rental rental) {
         String sql = "INSERT INTO rentals (username, book_id, rental_date, due_date, is_approved, is_returned, is_return_requested) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, rental.getUsername());
-            pstmt.setInt(2, rental.getBookId());
+            pstmt.setLong(2, rental.getBookId());
             pstmt.setDate(3, Date.valueOf(rental.getRentalDate()));
             pstmt.setDate(4, Date.valueOf(rental.getDueDate()));
             pstmt.setBoolean(5, rental.isApproved());
@@ -207,7 +197,7 @@ public class MySQLDataStorage implements DataStorage {
             // 생성된 키(대여 ID) 가져오기
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                int id = rs.getInt(1);
+                Long id = rs.getLong(1);
                 rental.setId(id);
                 rentals.add(rental);
             }
@@ -224,7 +214,7 @@ public class MySQLDataStorage implements DataStorage {
             pstmt.setBoolean(2, rental.isReturned());
             pstmt.setDate(3, rental.getReturnDate() != null ? Date.valueOf(rental.getReturnDate()) : null);
             pstmt.setBoolean(4, rental.isReturnRequested());
-            pstmt.setInt(5, rental.getId());
+            pstmt.setLong(5, rental.getId());
             pstmt.executeUpdate();
             for (int i = 0; i < rentals.size(); i++) {
                 if (rentals.get(i).getId() == rental.getId()) {
@@ -238,10 +228,10 @@ public class MySQLDataStorage implements DataStorage {
     }
 
     @Override
-    public void removeRental(final int rentalId) {
+    public void removeRental(Long rentalId) {
         String sql = "DELETE FROM rentals WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, rentalId);
+            pstmt.setLong(1, rentalId);
             pstmt.executeUpdate();
             rentals.removeIf(rental -> rental.getId() == rentalId);
         } catch (SQLException e) {
@@ -269,17 +259,5 @@ public class MySQLDataStorage implements DataStorage {
             }
         }
         return pendingReturns;
-    }
-
-    @Override
-    public List<Rental> getOverdueRentals() {
-        List<Rental> overdueRentals = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-        for (Rental rental : rentals) {
-            if (rental.isApproved() && !rental.isReturned() && rental.getDueDate().isBefore(today)) {
-                overdueRentals.add(rental);
-            }
-        }
-        return overdueRentals;
     }
 }

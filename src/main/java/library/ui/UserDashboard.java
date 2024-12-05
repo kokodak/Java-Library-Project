@@ -1,4 +1,4 @@
-package library;
+package library.ui;
 
 import java.awt.BorderLayout;
 import java.time.LocalDate;
@@ -10,8 +10,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import library.domain.Book;
+import library.domain.Rental;
+import library.domain.User;
+import library.persistence.DataStorage;
+import library.persistence.DataStorageFactory;
 
 public class UserDashboard extends JFrame {
+
     private User user;
     private JTable bookTable;
     private DefaultTableModel bookTableModel;
@@ -116,14 +122,13 @@ public class UserDashboard extends JFrame {
     private void requestRental() {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
-            int bookId = (int) bookTableModel.getValueAt(selectedRow, 0);
+            Long bookId = (long) bookTableModel.getValueAt(selectedRow, 0);
             Book book = dataStorage.getBooks().get(bookId);
             if (book.isAvailable()) {
                 LocalDate rentalDate = LocalDate.now();
                 LocalDate dueDate = rentalDate.plusDays(14);
                 Rental rental = new Rental(user.getUsername(), bookId, rentalDate, dueDate);
                 dataStorage.addRental(rental);
-                // book.setAvailable(false); // 이 줄을 제거합니다.
                 loadBookData("");
                 JOptionPane.showMessageDialog(this, "대여 요청이 접수되었습니다.");
                 loadRentalData(rentalTableModel);
@@ -138,7 +143,7 @@ public class UserDashboard extends JFrame {
     private void requestReturn() {
         int selectedRow = rentalTable.getSelectedRow();
         if (selectedRow != -1) {
-            int rentalId = (int) rentalTableModel.getValueAt(selectedRow, 0);
+            Long rentalId = (long) rentalTableModel.getValueAt(selectedRow, 0);
             Rental rental = dataStorage.getRentals().stream()
                                        .filter(r -> r.getId() == rentalId && r.getUsername().equals(user.getUsername()))
                                        .findFirst()

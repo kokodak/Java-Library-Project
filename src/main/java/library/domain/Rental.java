@@ -1,11 +1,12 @@
-package library;
+package library.domain;
 
 import java.time.LocalDate;
 
 public class Rental {
-    private int id;
+
+    private Long id;
     private String username;
-    private int bookId;
+    private Long bookId;
     private LocalDate rentalDate;
     private LocalDate dueDate;
     private LocalDate returnDate;
@@ -13,8 +14,15 @@ public class Rental {
     private boolean isReturned;
     private boolean isReturnRequested;
 
-    public Rental(final int id, final String username, final int bookId, final LocalDate rentalDate, final LocalDate dueDate, final LocalDate returnDate, final boolean isApproved,
-                  final boolean isReturned, final boolean isReturnRequested) {
+    public Rental(final Long id,
+                  final String username,
+                  final Long bookId,
+                  final LocalDate rentalDate,
+                  final LocalDate dueDate,
+                  final LocalDate returnDate,
+                  final boolean isApproved,
+                  final boolean isReturned,
+                  final boolean isReturnRequested) {
         this.id = id;
         this.username = username;
         this.bookId = bookId;
@@ -26,22 +34,23 @@ public class Rental {
         this.isReturnRequested = isReturnRequested;
     }
 
-    public Rental(String username, int bookId, LocalDate rentalDate, LocalDate dueDate) {
-        this.username = username;
-        this.bookId = bookId;
-        this.rentalDate = rentalDate;
-        this.dueDate = dueDate;
-        this.isApproved = false;
-        this.isReturned = false;
-        this.isReturnRequested = false;
+    public Rental(String username, Long bookId, LocalDate rentalDate, LocalDate dueDate) {
+        this(null,
+             username,
+             bookId,
+             rentalDate,
+             dueDate,
+             null,
+             false,
+             false,
+             false);
     }
 
-    // Getter와 Setter
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -49,7 +58,7 @@ public class Rental {
         return username;
     }
 
-    public int getBookId() {
+    public Long getBookId() {
         return bookId;
     }
 

@@ -1,9 +1,10 @@
-package library;
+package library.domain;
 
 public class User {
+
     private String username;
     private String password;
-    private String role; // "user" 또는 "admin"
+    private String role;
 
     public User(String username, String password, String role) {
         this.username = username;
@@ -11,7 +12,6 @@ public class User {
         this.role = role;
     }
 
-    // Getter와 Setter
     public String getUsername() {
         return username;
     }
@@ -22,9 +22,5 @@ public class User {
 
     public String getRole() {
         return role;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

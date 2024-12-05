@@ -1,14 +1,18 @@
-package library;
+package library.domain;
 
 public class Book {
-    private int id;
+
+    private Long id;
     private String title;
     private String author;
     private String category;
     private boolean isAvailable;
 
-    // 생성자
-    public Book(final int id, final String title, final String author, final String category, final boolean isAvailable) {
+    public Book(final Long id,
+                final String title,
+                final String author,
+                final String category,
+                final boolean isAvailable) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -16,18 +20,18 @@ public class Book {
         this.isAvailable = isAvailable;
     }
 
-    public Book(String title, String author, String category, boolean isAvailable) {
-        this.title = title;
-        this.author = author;
-        this.category = category;
-        this.isAvailable = isAvailable;
+    public Book(final String title,
+                final String author,
+                final String category,
+                final boolean isAvailable) {
+        this(null, title, author, category, isAvailable);
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(final int id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 

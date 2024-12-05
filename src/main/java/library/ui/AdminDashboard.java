@@ -1,4 +1,4 @@
-package library;
+package library.ui;
 
 import java.awt.BorderLayout;
 import java.time.LocalDate;
@@ -11,8 +11,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import library.domain.Book;
+import library.domain.Rental;
+import library.domain.User;
+import library.persistence.DataStorage;
+import library.persistence.DataStorageFactory;
 
 public class AdminDashboard extends JFrame {
+
     private User admin;
     private JTable bookTable;
     private DefaultTableModel bookTableModel;
@@ -184,7 +190,7 @@ public class AdminDashboard extends JFrame {
     private void editBook() {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
-            int bookId = (int) bookTableModel.getValueAt(selectedRow, 0);
+            Long bookId = (long) bookTableModel.getValueAt(selectedRow, 0);
             Book book = dataStorage.getBooks().get(bookId);
 
             JTextField titleField = new JTextField(book.getTitle());
@@ -221,7 +227,7 @@ public class AdminDashboard extends JFrame {
     private void deleteBook() {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow != -1) {
-            int bookId = (int) bookTableModel.getValueAt(selectedRow, 0);
+            Long bookId = (long) bookTableModel.getValueAt(selectedRow, 0);
             dataStorage.removeBook(bookId);
             loadBookData();
             JOptionPane.showMessageDialog(this, "도서가 삭제되었습니다.");
@@ -233,7 +239,7 @@ public class AdminDashboard extends JFrame {
     private void approveRentalRequest() {
         int selectedRow = rentalRequestTable.getSelectedRow();
         if (selectedRow != -1) {
-            int rentalId = (int) rentalRequestTableModel.getValueAt(selectedRow, 0);
+            Long rentalId = (long) rentalRequestTableModel.getValueAt(selectedRow, 0);
             Rental rental = dataStorage.getRentals().stream()
                                        .filter(r -> r.getId() == rentalId)
                                        .findFirst()
@@ -258,7 +264,7 @@ public class AdminDashboard extends JFrame {
     private void rejectRentalRequest() {
         int selectedRow = rentalRequestTable.getSelectedRow();
         if (selectedRow != -1) {
-            int rentalId = (int) rentalRequestTableModel.getValueAt(selectedRow, 0);
+            Long rentalId = (Long) rentalRequestTableModel.getValueAt(selectedRow, 0);
 
             // 데이터 저장소에서 대여 요청 제거
             Rental rental = dataStorage.getRentals().stream()
@@ -279,7 +285,7 @@ public class AdminDashboard extends JFrame {
     private void processReturnRequest() {
         int selectedRow = returnRequestTable.getSelectedRow();
         if (selectedRow != -1) {
-            int rentalId = (int) returnRequestTableModel.getValueAt(selectedRow, 0);
+            Long rentalId = (long) returnRequestTableModel.getValueAt(selectedRow, 0);
             Rental rental = dataStorage.getRentals().stream()
                                        .filter(r -> r.getId() == rentalId)
                                        .findFirst()
